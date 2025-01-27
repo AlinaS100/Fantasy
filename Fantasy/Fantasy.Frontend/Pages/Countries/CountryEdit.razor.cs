@@ -9,63 +9,63 @@ namespace Fantasy.Frontend.Pages.Countries;
 
 public partial class CountryEdit
 {
-    private Country? country;
-    private CountryForm? countryForm;
+	private Country? country;
+	private CountryForm? countryForm;
 
-    [Inject] private NavigationManager NavigationManager { get; set; } = null!;
-    [Inject] private IRepository Repository { get; set; } = null!;
-    [Inject] private SweetAlertService SweetAlertService { get; set; } = null!;
-    [Inject] private IStringLocalizer<Literals> Localizer { get; set; } = null!;
+	[Inject] private NavigationManager NavigationManager { get; set; } = null!;
+	[Inject] private IRepository Repository { get; set; } = null!;
+	[Inject] private SweetAlertService SweetAlertService { get; set; } = null!;
+	[Inject] private IStringLocalizer<Literals> Localizer { get; set; } = null!;
 
-    [Parameter] public int Id { get; set; }
+	[Parameter] public int Id { get; set; }
 
-    protected override async Task OnInitializedAsync()
-    {
-        var responseHttp = await Repository.GetAsync<Country>($"api/countries/{Id}");
+	protected override async Task OnInitializedAsync()
+	{
+		var responseHttp = await Repository.GetAsync<Country>($"api/countries/{Id}");
 
-        if (responseHttp.Error)
-        {
-            if (responseHttp.HttpResponseMessage.StatusCode == System.Net.HttpStatusCode.NotFound)
-            {
-                NavigationManager.NavigateTo("countries");
-            }
-            else
-            {
-                var messageError = await responseHttp.GetErrorMessageAsync();
-                await SweetAlertService.FireAsync(Localizer["Error"], messageError, SweetAlertIcon.Error);
-            }
-        }
-        else
-        {
-            country = responseHttp.Response;
-        }
-    }
+		if (responseHttp.Error)
+		{
+			if (responseHttp.HttpResponseMessage.StatusCode == System.Net.HttpStatusCode.NotFound)
+			{
+				NavigationManager.NavigateTo("countries");
+			}
+			else
+			{
+				var messageError = await responseHttp.GetErrorMessageAsync();
+				await SweetAlertService.FireAsync(Localizer["Error"], Localizer[messageError!], SweetAlertIcon.Error);
+			}
+		}
+		else
+		{
+			country = responseHttp.Response;
+		}
+	}
 
-    private async Task EditAsync()
-    {
-        var responseHttp = await Repository.PutAsync("api/countries", country);
+	private async Task EditAsync()
+	{
+		var responseHttp = await Repository.PutAsync("api/countries", country);
 
-        if (responseHttp.Error)
-        {
-            var mensajeError = await responseHttp.GetErrorMessageAsync();
-            await SweetAlertService.FireAsync(Localizer["Error"], mensajeError, SweetAlertIcon.Error);
-            return;
-        }
+		if (responseHttp.Error)
+		{
+			var mensajeError = await responseHttp.GetErrorMessageAsync();
+			await SweetAlertService.FireAsync(Localizer["Error"], mensajeError, SweetAlertIcon.Error);
+			return;
+		}
 
-        Return();
-        var toast = SweetAlertService.Mixin(new SweetAlertOptions
-        {
-            Toast = true,
-            Position = SweetAlertPosition.BottomEnd,
-            ShowConfirmButton = true,
-            Timer = 3000
-        });
-        await toast.FireAsync(icon: SweetAlertIcon.Success, message: Localizer["RecordSavedOk"]);
-    }
+		Return();
+		var toast = SweetAlertService.Mixin(new SweetAlertOptions
+		{
+			Toast = true,
+			Position = SweetAlertPosition.BottomEnd,
+			ShowConfirmButton = true,
+			Timer = 3000
+		});
+		await toast.FireAsync(icon: SweetAlertIcon.Success, message: Localizer["RecordSavedOk"]);
+	}
 
-    private void Return()
-    {
-        countryForm!.FormPostedSuccessfully = true;
-        NavigationManager.NavigateTo("countries");
-    }
+	private void Return()
+	{
+		countryForm!.FormPostedSuccessfully = true;
+		NavigationManager.NavigateTo("countries");
+	}
 }
